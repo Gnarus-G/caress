@@ -6,4 +6,4 @@ Grab a binary (linux or mac) in [releases](https://github.com/Gnarus-G/caress/re
 ./caress --help
 ```
 ##Demo
-![caress-demo-2022-06-30_00 35 40](https://user-images.githubusercontent.com/37311893/176593864-9416e194-4015-4cee-b253-5fdc0606ad72.gif)
+![caress-demo-2022-06-30_00 39 36](https://user-images.githubusercontent.com/37311893/176594383-e3723f73-f1c3-4dbe-9a70-71c4b6c21552.gif)
