@@ -11,25 +11,29 @@ struct Args {
     /// Create a directory.
     #[clap(short, long)]
     dir: bool,
+
+    /// Echo the path given.
+    #[clap(short, long)]
+    echo: bool,
 }
 
 fn main() {
     let args = Args::parse();
 
-    let result = {
-        if args.dir {
-            fs::create_dir_all(&args.path)
-        } else {
-            mk_file(args.path)
-        }
-    };
+    if let Err(err) = if args.dir {
+        fs::create_dir_all(&args.path)
+    } else {
+        mk_file(&args.path)
+    } {
+        return eprintln!("{err}");
+    }
 
-    if let Err(err) = result {
-        println!("{err}")
+    if args.echo {
+        return print!("{}", args.path.to_str().unwrap_or_default());
     }
 }
 
-fn mk_file(path: path::PathBuf) -> io::Result<()> {
+fn mk_file(path: &path::PathBuf) -> io::Result<()> {
     if let Err(err) = fs::File::create(&path) {
         if err.kind() == io::ErrorKind::NotFound {
             let mut temp = path.clone();
