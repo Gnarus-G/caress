@@ -1,16 +1,15 @@
 use clap::Parser;
-use std::{fs, io, path};
+use std::{
+    fs, io,
+    path::{self, MAIN_SEPARATOR},
+};
 
 #[derive(Parser)]
-#[clap(version, about, author)]
+#[command(version, about, author)]
 /// A tool to touch a file, or create a directory, while creating any necessary directories in the middle automatically
 struct Args {
     /// The path to touch.
     path: path::PathBuf,
-
-    /// Create a directory.
-    #[clap(short, long)]
-    dir: bool,
 
     /// Echo the path given.
     #[clap(short, long)]
@@ -20,7 +19,7 @@ struct Args {
 fn main() {
     let args = Args::parse();
 
-    if let Err(err) = if args.dir {
+    if let Err(err) = if path_is_dir(&args.path) {
         fs::create_dir_all(&args.path)
     } else {
         mk_file(&args.path)
@@ -46,4 +45,11 @@ fn mk_file(path: &path::PathBuf) -> io::Result<()> {
     }
 
     return Ok(());
+}
+
+#[inline]
+fn path_is_dir(p: &path::PathBuf) -> bool {
+    p.to_str()
+        .expect("path should be a valid string")
+        .ends_with(MAIN_SEPARATOR)
 }
