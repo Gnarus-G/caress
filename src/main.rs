@@ -17,34 +17,38 @@ struct Args {
 }
 
 fn main() {
-    let args = Args::parse();
-
-    if let Err(err) = if path_is_dir(&args.path) {
-        fs::create_dir_all(&args.path)
-    } else {
-        mk_file(&args.path)
-    } {
-        return eprintln!("{err}");
-    }
-
-    if args.echo {
-        return print!("{}", args.path.to_str().unwrap_or_default());
+    if let Err(err) = run() {
+        eprintln!("{}", err)
     }
 }
 
-fn mk_file(path: &path::PathBuf) -> io::Result<()> {
-    if let Err(err) = fs::File::create(&path) {
-        if err.kind() == io::ErrorKind::NotFound {
-            let mut temp = path.clone();
-            temp.pop();
-            fs::create_dir_all(temp)?;
-            fs::File::create(path)?;
-        } else {
-            return Err(err);
-        }
+fn run() -> std::io::Result<()> {
+    let args = Args::parse();
+
+    if path_is_dir(&args.path) {
+        fs::create_dir_all(&args.path)?
+    } else {
+        touch(&args.path)?
+    };
+
+    if args.echo {
+        print!("{}", args.path.to_str().unwrap_or_default());
     }
 
-    return Ok(());
+    Ok(())
+}
+
+fn touch(path: &path::PathBuf) -> io::Result<()> {
+    match fs::File::create(&path) {
+        Err(err) if err.kind() == io::ErrorKind::NotFound => {
+            let mut temp = path.clone();
+            temp.pop();
+            fs::create_dir_all(temp).and_then(|_| fs::File::create(path))?;
+            Ok(())
+        }
+        Err(err) => Err(err),
+        Ok(..) => Ok(()),
+    }
 }
 
 #[inline]
