@@ -6,12 +6,15 @@ use std::{
 
 #[derive(Parser)]
 #[command(version, about, author)]
-/// A tool to touch a file, or create a directory, while creating any necessary directories in the middle automatically
+/**
+A tool to touch a file, or create a directory, while creating any necessary directories in the middle automatically.
+To create a directory, end the path with a '/'.
+*/
 struct Args {
-    /// The path to touch.
-    path: path::PathBuf,
+    /// The paths to touch.
+    paths: Vec<path::PathBuf>,
 
-    /// Echo the path given.
+    /// Echo the paths given.
     #[clap(short, long)]
     echo: bool,
 }
@@ -25,16 +28,17 @@ fn main() {
 fn run() -> std::io::Result<()> {
     let args = Args::parse();
 
-    if path_is_dir(&args.path) {
-        fs::create_dir_all(&args.path)?
-    } else {
-        touch(&args.path)?
-    };
+    for path in args.paths {
+        if path_is_dir(&path) {
+            fs::create_dir_all(&path)?
+        } else {
+            touch(&path)?
+        };
 
-    if args.echo {
-        print!("{}", args.path.to_str().unwrap_or_default());
+        if args.echo {
+            println!("{}", path.to_str().unwrap_or_default());
+        }
     }
-
     Ok(())
 }
 
