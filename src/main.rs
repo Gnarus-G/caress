@@ -13,10 +13,6 @@ To create a directory, end the path with a '/'.
 struct Args {
     /// The paths to touch.
     paths: Vec<path::PathBuf>,
-
-    /// Echo the paths given.
-    #[clap(short, long)]
-    echo: bool,
 }
 
 fn main() {
@@ -34,10 +30,6 @@ fn run() -> std::io::Result<()> {
         } else {
             touch(&path)?
         };
-
-        if args.echo {
-            println!("{}", path.to_str().unwrap_or_default());
-        }
     }
     Ok(())
 }
