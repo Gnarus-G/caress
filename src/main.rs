@@ -29,7 +29,11 @@ fn main() {
 }
 
 fn touch(path: &path::PathBuf) -> io::Result<()> {
-    match fs::File::create(&path) {
+    if path.exists() {
+        return Ok(());
+    }
+
+    return match fs::File::create(&path) {
         Err(err) if err.kind() == io::ErrorKind::NotFound => {
             let mut temp = path.clone();
             temp.pop();
@@ -38,7 +42,7 @@ fn touch(path: &path::PathBuf) -> io::Result<()> {
         }
         Err(err) => Err(err),
         Ok(..) => Ok(()),
-    }
+    };
 }
 
 #[inline]
