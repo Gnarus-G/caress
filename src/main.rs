@@ -16,22 +16,16 @@ struct Args {
 }
 
 fn main() {
-    if let Err(err) = run() {
-        eprintln!("{}", err)
-    }
-}
-
-fn run() -> std::io::Result<()> {
     let args = Args::parse();
 
     for path in args.paths {
-        if path_is_dir(&path) {
-            fs::create_dir_all(&path)?
+        let _ = if path_is_dir(&path) {
+            fs::create_dir_all(&path)
+                .map_err(|err| eprintln!("cannot create directory {path:?}: {err}"))
         } else {
-            touch(&path)?
+            touch(&path).map_err(|err| eprintln!("cannot create file {path:?}: {err}"))
         };
     }
-    Ok(())
 }
 
 fn touch(path: &path::PathBuf) -> io::Result<()> {
