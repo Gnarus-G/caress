@@ -1,7 +1,7 @@
 use std::fs;
 
 use caress::{mkdir, mkdir_alt, mkdir_alt2, test_utils::TestDirs};
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::{criterion_group, criterion_main, Criterion};
 
 const DIR_COUNT: usize = 1000;
 

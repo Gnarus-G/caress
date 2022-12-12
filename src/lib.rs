@@ -1,18 +1,24 @@
 use std::{
-    ffi::OsStr,
     fs, io,
     path::{Path, PathBuf, MAIN_SEPARATOR},
 };
 
 pub fn mkdir(path: &Path) -> io::Result<()> {
-    let mut dirs = path.components().map(|c| c.as_os_str()).collect::<Vec<_>>();
-    let mut tmp_dirs = vec![];
+    let mut dirs = path
+        .iter()
+        .scan(PathBuf::new(), |path, s| {
+            path.push(s);
+            Some(path.clone())
+        })
+        .collect::<Vec<_>>();
 
-    loop {
-        if let Err(err) = fs::create_dir(dirs.join(OsStr::new("/"))) {
+    let mut need_to_create = vec![];
+
+    while let Some(path) = dirs.last() {
+        if let Err(err) = fs::create_dir(path) {
             if err.kind() == io::ErrorKind::NotFound {
                 if let Some(s) = dirs.pop() {
-                    tmp_dirs.push(s);
+                    need_to_create.push(s);
                     continue;
                 }
             }
@@ -21,10 +27,8 @@ pub fn mkdir(path: &Path) -> io::Result<()> {
         break;
     }
 
-    for s in tmp_dirs.iter().rev() {
-        dirs.push(s);
-        let p = dirs.join(OsStr::new("/"));
-        fs::create_dir(p)?;
+    for s in need_to_create.iter().rev() {
+        fs::create_dir(s)?;
     }
 
     Ok(())
