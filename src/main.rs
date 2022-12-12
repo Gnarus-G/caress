@@ -1,7 +1,8 @@
+use caress::mkdir;
 use clap::Parser;
 use std::{
     fs, io,
-    path::{self, MAIN_SEPARATOR},
+    path::{self, PathBuf, MAIN_SEPARATOR},
 };
 
 #[derive(Parser)]
@@ -12,7 +13,7 @@ To create a directory, end the path with a '/'.
 */
 struct Args {
     /// The paths to touch.
-    paths: Vec<path::PathBuf>,
+    paths: Vec<PathBuf>,
 }
 
 fn main() {
@@ -20,7 +21,7 @@ fn main() {
 
     for path in args.paths {
         let _ = if path_is_dir(&path) {
-            fs::create_dir_all(&path)
+            mkdir(&mut path.clone())
                 .map_err(|err| eprintln!("cannot create directory {path:?}: {err}"))
         } else {
             touch(&path).map_err(|err| eprintln!("cannot create file {path:?}: {err}"))
@@ -35,9 +36,9 @@ fn touch(path: &path::PathBuf) -> io::Result<()> {
 
     return match fs::File::create(&path) {
         Err(err) if err.kind() == io::ErrorKind::NotFound => {
-            let mut temp = path.clone();
-            temp.pop();
-            fs::create_dir_all(temp).and_then(|_| fs::File::create(path))?;
+            if let Some(dir) = path.parent() {
+                mkdir(&mut dir.to_path_buf()).and_then(|_| fs::File::create(path))?;
+            }
             Ok(())
         }
         Err(err) => Err(err),
