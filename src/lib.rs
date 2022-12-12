@@ -51,14 +51,14 @@ pub fn mkdir_alt(path: &mut PathBuf) -> io::Result<()> {
 
 pub fn mkdir_alt2(path: &Path) -> io::Result<()> {
     let mut p_buf = PathBuf::new();
-    let mut check_dir = true;
 
     for s in path.iter() {
         p_buf.push(s);
-        if !check_dir || (check_dir && !p_buf.is_dir()) {
-            fs::create_dir(&p_buf)?;
-            check_dir = false;
-        }
+        match fs::create_dir(&p_buf) {
+            Err(err) if err.kind() == io::ErrorKind::AlreadyExists => {}
+            Ok(..) => {}
+            e => return e,
+        };
     }
 
     Ok(())
