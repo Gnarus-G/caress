@@ -4,20 +4,22 @@ use std::{
 };
 
 pub fn mkdir(path: &Path) -> io::Result<()> {
-    let mut dirs = path
-        .iter()
-        .scan(PathBuf::new(), |path, s| {
-            path.push(s);
-            Some(path.clone())
-        })
-        .collect::<Vec<_>>();
-
+    let mut path = PathBuf::from(path);
     let mut need_to_create = vec![];
 
-    while let Some(path) = dirs.last() {
-        if let Err(err) = fs::create_dir(path) {
+    let pop = |path: &mut PathBuf| {
+        let c = path.clone().join("dummy");
+        if path.pop() {
+            let popped = c.parent().map(|p| p.to_path_buf());
+            return popped;
+        }
+        return None;
+    };
+
+    while !path.as_os_str().is_empty() {
+        if let Err(err) = fs::create_dir(&path) {
             if err.kind() == io::ErrorKind::NotFound {
-                if let Some(s) = dirs.pop() {
+                if let Some(s) = pop(&mut path) {
                     need_to_create.push(s);
                     continue;
                 }
