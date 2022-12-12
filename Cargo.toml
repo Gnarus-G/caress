@@ -7,3 +7,11 @@ edition = "2021"
 
 [dependencies]
 clap = { version = "4.0.29", features = ["derive"] }
+
+[dev-dependencies]
+criterion = "0.3"
+
+[[bench]]
+name = "creating_directories_benchmark"
+harness = false
+

@@ -1,7 +1,7 @@
 use clap::Parser;
 use std::{
     fs, io,
-    path::{self, MAIN_SEPARATOR},
+    path::{self, PathBuf, MAIN_SEPARATOR},
 };
 
 #[derive(Parser)]
@@ -12,7 +12,7 @@ To create a directory, end the path with a '/'.
 */
 struct Args {
     /// The paths to touch.
-    paths: Vec<path::PathBuf>,
+    paths: Vec<PathBuf>,
 }
 
 fn main() {
