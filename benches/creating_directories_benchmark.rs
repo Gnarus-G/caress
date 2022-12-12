@@ -22,7 +22,7 @@ fn mkdir_benchmark(c: &mut Criterion) {
         b.iter(|| {
             let td = TestDirs::new("mkdir-method", DIR_COUNT);
 
-            mkdir(&td.path).unwrap();
+            mkdir(&mut td.path.clone()).unwrap();
 
             td.remove();
         })
@@ -34,7 +34,7 @@ fn mkdir_alt_benchmark(c: &mut Criterion) {
         b.iter(|| {
             let td = TestDirs::new("mkdir_alt-method", DIR_COUNT);
 
-            mkdir_alt(&mut td.path.clone()).unwrap();
+            mkdir_alt(&td.path).unwrap();
 
             td.remove();
         })

@@ -3,7 +3,35 @@ use std::{
     path::{Path, PathBuf, MAIN_SEPARATOR},
 };
 
-pub fn mkdir(path: &Path) -> io::Result<()> {
+pub fn mkdir(path: &mut PathBuf) -> io::Result<()> {
+    match fs::create_dir(&path) {
+        Err(err) if err.kind() == io::ErrorKind::NotFound => {
+            if let Some(p) = path.parent() {
+                mkdir(&mut PathBuf::from(p))?;
+                fs::create_dir(path)?;
+            }
+            Ok(())
+        }
+        e => e,
+    }
+}
+
+pub fn mkdir_alt(path: &Path) -> io::Result<()> {
+    let mut p_buf = PathBuf::new();
+
+    for s in path.iter() {
+        p_buf.push(s);
+        match fs::create_dir(&p_buf) {
+            Err(err) if err.kind() == io::ErrorKind::AlreadyExists => {}
+            Ok(..) => {}
+            e => return e,
+        };
+    }
+
+    Ok(())
+}
+
+pub fn mkdir_alt2(path: &Path) -> io::Result<()> {
     let mut path = PathBuf::from(path);
     let mut need_to_create = vec![];
 
@@ -31,34 +59,6 @@ pub fn mkdir(path: &Path) -> io::Result<()> {
 
     for s in need_to_create.iter().rev() {
         fs::create_dir(s)?;
-    }
-
-    Ok(())
-}
-
-pub fn mkdir_alt(path: &mut PathBuf) -> io::Result<()> {
-    match fs::create_dir(&path) {
-        Err(err) if err.kind() == io::ErrorKind::NotFound => {
-            if let Some(p) = path.parent() {
-                mkdir_alt(&mut PathBuf::from(p))?;
-                fs::create_dir(path)?;
-            }
-            Ok(())
-        }
-        e => e,
-    }
-}
-
-pub fn mkdir_alt2(path: &Path) -> io::Result<()> {
-    let mut p_buf = PathBuf::new();
-
-    for s in path.iter() {
-        p_buf.push(s);
-        match fs::create_dir(&p_buf) {
-            Err(err) if err.kind() == io::ErrorKind::AlreadyExists => {}
-            Ok(..) => {}
-            e => return e,
-        };
     }
 
     Ok(())

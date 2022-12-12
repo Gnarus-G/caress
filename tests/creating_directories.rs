@@ -35,7 +35,9 @@ mod tests {
     }
 
     mod custom_fns {
-        use caress::{mkdir, mkdir_alt, mkdir_alt2};
+        use caress::mkdir;
+        use caress::mkdir_alt;
+        use caress::mkdir_alt2;
 
         use super::*;
 
@@ -44,7 +46,7 @@ mod tests {
             let td = TestDirs::new("custom-mkdir-method", 10);
             let path = &td.path;
 
-            mkdir(&path).unwrap();
+            mkdir(&mut path.clone()).unwrap();
 
             assert_dir_path_create(path);
 
@@ -58,7 +60,7 @@ mod tests {
 
             fs::create_dir_all(path.parent().unwrap().parent().unwrap()).unwrap();
 
-            mkdir(&path).unwrap();
+            mkdir(&mut path.clone()).unwrap();
 
             assert_dir_path_create(path);
 
@@ -68,9 +70,9 @@ mod tests {
         #[test]
         fn create_dirs_with_mkdir_alt() {
             let td = TestDirs::new("tt", 10);
-            let mut path = td.path.clone();
+            let path = &td.path;
 
-            mkdir_alt(&mut path).unwrap();
+            mkdir_alt(path).unwrap();
 
             assert_dir_path_create(&path);
 
